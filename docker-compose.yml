@@ -34,7 +34,7 @@ services:
       - DB_URL=mssql+pyodbc://sa:YourStrongPassword123!@mssql/SampleDB?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
       # - MCP_SERVER_URL=http://fastmcp:8080
       # - LLAMA_API_URL=http://llm-server:8080
-      - LLAMACPP_URL=http://34.135.128.255:23178
+      - LLAMACPP_URL=http://
       - EXECUTE_QUERY_MAX_CHARS=32768
     networks:
       - mcp-network
