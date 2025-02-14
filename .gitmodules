@@ -1,0 +1,3 @@
+[submodule "mcp-alchemy"]
+	path = mcp-alchemy
+	url = https://github.com/runekaagaard/mcp-alchemy

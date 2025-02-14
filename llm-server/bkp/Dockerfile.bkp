@@ -1,0 +1,45 @@
+FROM --platform=linux/amd64 python:3.13-bookworm
+
+WORKDIR /app
+
+# Install basic build tools and OpenBLAS
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    libopenblas-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone llama.cpp
+RUN git clone https://github.com/ggerganov/llama.cpp.git
+
+# Apply specific ARM build configuration
+RUN cd llama.cpp && \
+    sed -i 's/set(LLAMA_NATIVE ON)/set(LLAMA_NATIVE OFF)/' CMakeLists.txt && \
+    sed -i 's/-mcpu=native/-mcpu=cortex-a72/' ggml/src/ggml-cpu/CMakeLists.txt && \
+    mkdir build && \
+    cd build && \
+    cmake .. \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DGGML_CPU_TARGET="cortex-a72" \
+    -DBUILD_SHARED_LIBS=ON \
+    -DLLAMA_BUILD_SERVER=ON \
+    -DCMAKE_C_FLAGS="-O3 -mcpu=cortex-a72" \
+    -DCMAKE_CXX_FLAGS="-O3 -mcpu=cortex-a72" && \
+    cmake --build . --config Release
+
+# Install Python package dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy application code
+COPY ./src .
+
+# Create models directory
+RUN mkdir -p /app/models
+
+COPY ./models /app/models
+
+# Container startup command
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

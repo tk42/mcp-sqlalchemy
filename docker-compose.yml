@@ -1,0 +1,61 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrongPassword123!
+    ports:
+      - "1433:1433"
+    networks:
+      - mcp-network
+
+  init-db:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - mssql
+    volumes:
+      - ./mssql/init.sql:/init.sql
+    networks:
+      - mcp-network
+    entrypoint: >
+      /bin/bash -c "
+      sleep 10 &&
+      /opt/mssql-tools/bin/sqlcmd -S mssql -U SA -P 'YourStrongPassword123!' -i /init.sql
+      "
+
+  streamlit:
+    build: .
+    platform: linux/amd64
+    ports:
+      - "8501:8501"
+    depends_on:
+      - mssql
+    environment:
+      - DB_URL=mssql+pyodbc://sa:YourStrongPassword123!@mssql/SampleDB?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+      # - MCP_SERVER_URL=http://fastmcp:8080
+      # - LLAMA_API_URL=http://llm-server:8080
+      - LLAMACPP_URL=http://34.135.128.255:23178
+      - EXECUTE_QUERY_MAX_CHARS=32768
+    networks:
+      - mcp-network
+
+  # llm-server:
+  #   image: ghcr.io/ggerganov/llama.cpp:server-cuda
+  #   platform: linux/amd64
+  #   ports:
+  #     - "8001:8080"
+  #   volumes:
+  #     - ./llm-server/models:/models
+  #   environment:
+  #     - LLAMA_ARG_MODEL=/models/phi-4-Q4_K_M.gguf
+  #     - LLAMA_ARG_PORT=8080
+  #   networks:
+  #     - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  mssql-data:
+    driver: local

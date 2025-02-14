@@ -1,0 +1,12 @@
+services:
+  llm-server:
+    image: ghcr.io/ggerganov/llama.cpp:server-cuda
+    platform: linux/amd64
+    ports:
+      - "23178:8080"
+    volumes:
+      - ./models:/models
+    environment:
+      - LLAMA_ARG_MODEL=/models/phi-4-Q2_K.gguf
+      - LLAMA_ARG_PORT=8080
+      - LLAMA_ARG_JINJA=1
