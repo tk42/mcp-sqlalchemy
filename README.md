@@ -25,6 +25,11 @@ docker compose up
 
 ![ss2.png](ss2.png)
 
+## References
+- [MCP Alchemy](https://github.com/runekaagaard/mcp-alchemy)
+- [llamacpp](https://github.com/ggerganov/llamacpp)
+- [MCP(Model Context Protocol)のClientにOpenAI APIを利用する方法](https://note.com/gotalab/n/n8214fc9cc205)
+
 ## License
 
 See the LICENSE file for details.
